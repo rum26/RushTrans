@@ -56,6 +56,7 @@ patch_startup = patch = f'C:\\Users\\{username}\\AppData\\Roaming\\Microsoft\\Wi
 if os.path.exists(patch_startup):
     text_add = "Run RushTrans . . ."
     text_msg = "v050226.15"
+    shutil.copy2('RushTrans.pyw', patch_startup)  # что бы новые версии добавлялись в автозапуск
     show_autostart_notification(text_add, text_msg)
 else:
     shutil.copy2('RushTrans.pyw', patch_startup)
@@ -132,7 +133,7 @@ def close_window(_):
 
 
 root.overrideredirect(True)
-root.attributes("-alpha", 0.7)
+root.attributes("-alpha", 0.1)
 
 screen_width = root.winfo_screenwidth()
 window_width = int(screen_width / 3)
@@ -161,6 +162,7 @@ def update_label_text(text, clr):
 
 
 def main(text):
+    root.attributes("-alpha", 0.7)
     global copy_handler
     copy_handler = True
     answer, clr = text_processing(text)
@@ -173,6 +175,7 @@ def main(text):
         global copy_handler
         copy_handler = None
         root.attributes('-topmost', False)
+        root.attributes("-alpha", 0.1)
         root.lower()
 
     root.after(6000, disable_copy)
