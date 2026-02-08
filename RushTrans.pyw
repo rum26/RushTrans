@@ -4,7 +4,6 @@ from deep_translator import GoogleTranslator
 import tkinter as tk
 import pyperclip
 import keyboard
-import shutil
 import time
 import json
 import os
@@ -51,29 +50,35 @@ current_label = None
 copy_handler = None
 
 patch_documents = os.path.join(os.environ["USERPROFILE"], "Documents")
-username = os.environ['USERNAME']
-patch_startup = patch = f'C:\\Users\\{username}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RushTrans.pyw'
-if os.path.exists(patch_startup):
-    text_add = "Run RushTrans . . ."
-    text_msg = "v050226.15"
-    shutil.copy2('RushTrans.pyw', patch_startup)  # что бы новые версии добавлялись в автозапуск
-    show_autostart_notification(text_add, text_msg)
-else:
-    shutil.copy2('RushTrans.pyw', patch_startup)
-    text_add = "✓ Программа добавлена"
-    text_msg = "Теперь запускается автоматически\nпри входе в систему"
-    show_autostart_notification(text_add, text_msg)
+
 
 if os.path.exists(f"{patch_documents}/pdict.json"):
+    text_add = "Run RushTrans . . ."
+    text_msg = "v050226.15"
+    show_autostart_notification(text_add, text_msg)
     with open(f"{patch_documents}/pdict.json", 'r', encoding='UTF-8') as fb:
         Pdict = json.load(fb)
 else:
     Pdict = {}
+    text_add = "✓ Словарь создан!"
+    text_msg = "v050226.15"
+    show_autostart_notification(text_add, text_msg)
 
 
 def save_pdict():
-    with open(f"{patch_documents}/pdict.json", "w", encoding="UTF-8") as f:
-        json.dump(Pdict, f, ensure_ascii=False, indent=2)
+    with open(f"{patch_documents}/pdict.json", "w", encoding="UTF-8") as file:
+        json.dump(Pdict, file, ensure_ascii=False, indent=2)
+
+
+if os.path.exists("tmp.json"):
+    with open("tmp.json", 'r', encoding='UTF-8') as fb:
+        data = json.load(fb)
+    for wrd, trans in data.items():
+        print(f"{wrd} : {trans}")
+        Pdict[wrd] = trans
+    save_pdict()
+    with open("tmp.json", "w", encoding="UTF-8") as f:
+        json.dump({}, f)
 
 
 def translate_word_auto(word):
@@ -111,7 +116,8 @@ def text_processing(text):
         Pdict[answer] = text
         save_pdict()
         clr = 'yellow'  # фраза из интернета.
-    answer = answer.replace(' ', '_')
+    if ',' not in answer:
+        answer = answer.replace(' ', '_')
     return answer, clr
 
 
@@ -134,12 +140,13 @@ def close_window(_):
 
 root.overrideredirect(True)
 root.attributes("-alpha", 0.1)
-
 screen_width = root.winfo_screenwidth()
-window_width = int(screen_width / 3)
+window_width = int(screen_width / 2)
 x_position = int((screen_width - window_width) / 2)
 root.geometry(f"{window_width}x30+{x_position}+0")
 root.configure(bg="black")
+bottom_line = tk.Frame(root, bg="#40E0D0", height=1)
+bottom_line.pack(side="bottom", fill="x")
 
 
 def update_label_text(text, clr):
@@ -148,21 +155,21 @@ def update_label_text(text, clr):
     if current_label:
         current_label.destroy()
 
-    # Создаем новый label с новым текстом
     current_label = tk.Label(
         root,
         text=text,
         bg="black",
         fg=clr,
-        font=("Segoe UI", 18),
+        font=("Consolas", 16, "bold"),
         justify="center",
+        anchor="center"
     )
     current_label.pack(expand=True, fill='both')
     current_label.after(6000, current_label.destroy)
 
 
 def main(text):
-    root.attributes("-alpha", 0.7)
+    root.attributes("-alpha", 0.85)
     global copy_handler
     copy_handler = True
     answer, clr = text_processing(text)
