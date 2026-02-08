@@ -54,14 +54,14 @@ patch_documents = os.path.join(os.environ["USERPROFILE"], "Documents")
 
 if os.path.exists(f"{patch_documents}/pdict.json"):
     text_add = "Run RushTrans . . ."
-    text_msg = "v050226.15"
+    text_msg = "v080226.19"
     show_autostart_notification(text_add, text_msg)
     with open(f"{patch_documents}/pdict.json", 'r', encoding='UTF-8') as fb:
         Pdict = json.load(fb)
 else:
     Pdict = {}
     text_add = "✓ Словарь создан!"
-    text_msg = "v050226.15"
+    text_msg = "v080226.19"
     show_autostart_notification(text_add, text_msg)
 
 
