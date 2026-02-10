@@ -86,11 +86,15 @@ if os.path.exists(f"{patch_documents}/pdict.json"):
         Pdict = json.load(fb)
 else:
     try:
-        Pdict = requests.get('https://github.com/rum26/RushTrans/blob/main/pdict.json').json()
-        text_add = "✓ Словарь загружен!!"
+        Pdict = requests.get('https://raw.githubusercontent.com/rum26/RushTrans/refs/heads/main/pdict.json').json()
+        text_add = "✓ Словарь загружен!"
         text_msg = "v080226.19"
         show_start(text_add, text_msg)
-    except Exception:
+        with open(f"{patch_documents}/pdict.json", "w", encoding="UTF-8") as f:
+            json.dump(Pdict, f, ensure_ascii=False, indent=2)
+
+    except Exception as ex:
+        print(ex)
         Pdict = {}
         text_add = "✓ Словарь создан!"
         text_msg = "v080226.19"
