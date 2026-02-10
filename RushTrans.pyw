@@ -56,20 +56,18 @@ def show_start(text1, text2):
 def ensure_autostart():
     startup_folder = os.path.join(
         os.environ["APPDATA"],
-        r"Microsoft\Windows\Start Menu\Programs\Startup"
-    )
+        r"Microsoft\Windows\Start Menu\Programs\Startup")
     shortcut_path = os.path.join(startup_folder, "RushTrans.pyw.lnk")
-    script_path = os.path.abspath(sys.argv[0])
     if os.path.exists(shortcut_path):
         return
-    # Создание ярлыка
+    script_path = os.path.abspath(sys.argv[0])
+    pythonw = sys.executable.replace("python.exe", "pythonw.exe")
     shell = Dispatch("WScript.Shell")
     shortcut = shell.CreateShortCut(shortcut_path)
-    shortcut.Targetpath = sys.executable   # python.exe
+    shortcut.Targetpath = pythonw
     shortcut.Arguments = f'"{script_path}"'
     shortcut.WorkingDirectory = os.path.dirname(script_path)
-    shortcut.IconLocation = script_path
-    shortcut.save()
+    shortcut.WindowStyle = 7
     show_start("RushTrans добавлен в автозагрузку!", "v080226.19")
     time.sleep(3)
 
