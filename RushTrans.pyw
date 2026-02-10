@@ -68,6 +68,7 @@ def ensure_autostart():
     shortcut.Arguments = f'"{script_path}"'
     shortcut.WorkingDirectory = os.path.dirname(script_path)
     shortcut.WindowStyle = 7
+    shortcut.save()
     show_start("RushTrans добавлен в автозагрузку!", "v080226.19")
     time.sleep(3)
 
