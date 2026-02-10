@@ -11,4 +11,11 @@
 
 
 # 📦 Установка
-- pip install tkinter deep-translator keyboard pyperclip
+- pip install deep-translator requests pywin32 pyperclip keyboard
+
+
+- deep-translator — включает GoogleTranslator 
+- requests — для requests.exceptions 
+- pywin32 — содержит win32com.client 
+- pyperclip — буфер обмена 
+- keyboard — работа с клавиатурой

@@ -1,15 +1,23 @@
 from deep_translator.exceptions import RequestError, TooManyRequests
 from requests.exceptions import ConnectionError, Timeout
 from deep_translator import GoogleTranslator
+from win32com.client import Dispatch
 import tkinter as tk
 import pyperclip
+import requests
 import keyboard
 import time
 import json
+import sys
 import os
 
 
-def show_autostart_notification(text1, text2):
+last_copy_time = 0
+current_label = None
+copy_handler = None
+
+
+def show_start(text1, text2):
     # Создаем временное окно уведомления
     notify = tk.Tk()
     notify.overrideredirect(True)
@@ -45,24 +53,48 @@ def show_autostart_notification(text1, text2):
     notify.after(6000, fade_out)
 
 
-last_copy_time = 0
-current_label = None
-copy_handler = None
+def ensure_autostart():
+    startup_folder = os.path.join(
+        os.environ["APPDATA"],
+        r"Microsoft\Windows\Start Menu\Programs\Startup"
+    )
+    shortcut_path = os.path.join(startup_folder, "RushTrans.pyw.lnk")
+    script_path = os.path.abspath(sys.argv[0])
+    if os.path.exists(shortcut_path):
+        return
+    # Создание ярлыка
+    shell = Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortCut(shortcut_path)
+    shortcut.Targetpath = sys.executable   # python.exe
+    shortcut.Arguments = f'"{script_path}"'
+    shortcut.WorkingDirectory = os.path.dirname(script_path)
+    shortcut.IconLocation = script_path
+    shortcut.save()
+    show_start("RushTrans добавлен в автозагрузку!", "v080226.19")
+    time.sleep(3)
 
+
+ensure_autostart()
 patch_documents = os.path.join(os.environ["USERPROFILE"], "Documents")
 
 
 if os.path.exists(f"{patch_documents}/pdict.json"):
     text_add = "Run RushTrans . . ."
     text_msg = "v080226.19"
-    show_autostart_notification(text_add, text_msg)
+    show_start(text_add, text_msg)
     with open(f"{patch_documents}/pdict.json", 'r', encoding='UTF-8') as fb:
         Pdict = json.load(fb)
 else:
-    Pdict = {}
-    text_add = "✓ Словарь создан!"
-    text_msg = "v080226.19"
-    show_autostart_notification(text_add, text_msg)
+    try:
+        Pdict = requests.get('https://github.com/rum26/RushTrans/blob/main/pdict.json').json()
+        text_add = "✓ Словарь загружен!!"
+        text_msg = "v080226.19"
+        show_start(text_add, text_msg)
+    except Exception:
+        Pdict = {}
+        text_add = "✓ Словарь создан!"
+        text_msg = "v080226.19"
+        show_start(text_add, text_msg)
 
 
 def save_pdict():
@@ -74,8 +106,10 @@ if os.path.exists("tmp.json"):
     with open("tmp.json", 'r', encoding='UTF-8') as fb:
         data = json.load(fb)
     for wrd, trans in data.items():
-        print(f"{wrd} : {trans}")
-        Pdict[wrd] = trans
+        wrd = wrd.lower()
+        if Pdict.get(wrd) is None:
+            print(f"{wrd} : {trans}")
+            Pdict[wrd] = trans
     save_pdict()
     with open("tmp.json", "w", encoding="UTF-8") as f:
         json.dump({}, f)
